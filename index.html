@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+body { background: #fff; padding: 10px; font-size: 13px; }
+h2 { font-size: 15px; font-weight: bold; color: #0040ff; margin-bottom: 6px; text-align: center; }
+.team-detected { font-size: 12px; color: #555; text-align: center; margin-bottom: 8px; }
+.team-detected b { color: #0040ff; }
+textarea { width: 100%; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; padding: 7px 9px; margin-bottom: 7px; background: #fff; color: #000; min-height: 65px; resize: vertical; }
+.submit-btn { display: block; width: 100%; font-size: 13px; font-weight: bold; background: #0040ff; color: #fff; border: none; border-radius: 4px; padding: 10px; cursor: pointer; margin-top: 4px; }
+.submit-btn:hover { background: #0030cc; }
+.status { font-size: 12px; color: #555; text-align: center; padding: 4px; min-height: 20px; }
+.feed-label { font-size: 11px; color: #888; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; margin: 12px 0 6px; }
+.post { border: 1px solid #e0e0e0; border-radius: 6px; padding: 9px 11px; margin-bottom: 7px; }
+.post-header { display: flex; justify-content: space-between; margin-bottom: 3px; }
+.post-team { font-weight: bold; color: #0040ff; font-size: 13px; }
+.post-time { font-size: 11px; color: #aaa; }
+.post-text { font-size: 13px; color: #333; line-height: 1.5; }
+.empty { font-size: 13px; color: #aaa; text-align: center; padding: 20px; }
+</style>
+</head>
+<body>
+
+<h2>💬 League Suggestion Board</h2>
+<p class="team-detected" id="teamLabel">Detecting your team...</p>
+<textarea id="postText" placeholder="Share a suggestion to improve the league..."></textarea>
+<button class="submit-btn" onclick="submitPost()">Submit Suggestion</button>
+<p class="status" id="status"></p>
+
+<p class="feed-label">All Suggestions</p>
+<div id="feed"><p class="empty">Loading...</p></div>
+
+<script>
+const BIN_ID = '6a234cabda38895dfe8eb553';
+const MASTER_KEY = '$2a$10$MRejZz/frOMmyK.Z/GCOlOk9Eoq3nMeBJfnCZCneym71sw28DsyzO';
+const ACCESS_KEY = '$2a$10$x5zU4CA2F5A5qObO/wOkg.HkKFBITwKSG4nqav2ZbPSr403035jXG';
+const API_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
+
+let detectedTeam = '';
+try {
+  const parentLink = window.parent.jQuery("a[href*='F='][href*='O=07']").first().text().trim();
+  if (parentLink) detectedTeam = parentLink;
+} catch(e) {}
+
+if (detectedTeam) {
+  document.getElementById('teamLabel').innerHTML = 'Posting as: <b>' + detectedTeam + '</b>';
+} else {
+  document.getElementById('teamLabel').textContent = 'Could not detect team';
+  detectedTeam = 'Unknown Team';
+}
+
+function timeAgo(ts) {
+  const d = Math.floor((Date.now() - ts) / 1000);
+  if (d < 60) return 'just now';
+  if (d < 3600) return Math.floor(d/60) + 'm ago';
+  if (d < 86400) return Math.floor(d/3600) + 'h ago';
+  return Math.floor(d/86400) + 'd ago';
+}
+
+async function loadPosts() {
+  try {
+    const r = await fetch(API_URL + '/latest', {
+      headers: { 'X-Master-Key': MASTER_KEY, 'X-Access-Key': ACCESS_KEY }
+    });
+    const data = await r.json();
+    return data.record.posts || [];
+  } catch(e) { return []; }
+}
+
+async function savePosts(posts) {
+  await fetch(API_URL, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Master-Key': MASTER_KEY,
+      'X-Access-Key': ACCESS_KEY
+    },
+    body: JSON.stringify({ posts })
+  });
+}
+
+function renderFeed(posts) {
+  const feed = document.getElementById('feed');
+  if (!posts.length) { feed.innerHTML = '<p class="empty">No suggestions yet. Be the first!</p>'; return; }
+  feed.innerHTML = posts.slice().reverse().map(p => `
+    <div class="post">
+      <div class="post-header">
+        <span class="post-team">${p.team}</span>
+        <span class="post-time">${timeAgo(p.ts)}</span>
+      </div>
+      <p class="post-text">${p.text}</p>
+    </div>
+  `).join('');
+}
+
+async function submitPost() {
+  const text = document.getElementById('postText').value.trim();
+  const status = document.getElementById('status');
+  if (!text) { status.textContent = 'Please enter a suggestion.'; return; }
+  status.textContent = 'Posting...';
+  const posts = await loadPosts();
+  posts.push({ team: detectedTeam, text, ts: Date.now() });
+  await savePosts(posts);
+  document.getElementById('postText').value = '';
+  status.textContent = 'Posted!';
+  setTimeout(() => status.textContent = '', 2000);
+  renderFeed(posts);
+}
+
+loadPosts().then(renderFeed);
+</script>
+</body>
+</html>
