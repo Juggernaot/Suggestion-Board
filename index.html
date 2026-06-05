@@ -38,12 +38,9 @@ const MASTER_KEY = '$2a$10$MRejZz/frOMmyK.Z/GCOlOk9Eoq3nMeBJfnCZCneym71sw28DsyzO
 const ACCESS_KEY = '$2a$10$x5zU4CA2F5A5qObO/wOkg.HkKFBITwKSG4nqav2ZbPSr403035jXG';
 const API_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
 
-let detectedTeam = '';
-try {
-  const parentLink = window.parent.jQuery("a[href*='F='][href*='O=07']").first().text().trim();
-  if (parentLink) detectedTeam = parentLink;
-} catch(e) {}
 
+const params = new URLSearchParams(window.location.search);
+let detectedTeam = params.get('team') || 'Unknown Team';
 if (detectedTeam) {
   document.getElementById('teamLabel').innerHTML = 'Posting as: <b>' + detectedTeam + '</b>';
 } else {
