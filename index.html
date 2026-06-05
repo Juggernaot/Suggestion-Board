@@ -4,28 +4,26 @@
 <meta charset="UTF-8">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-body { background: #fff; padding: 10px; font-size: 13px; }
-h2 { font-size: 15px; font-weight: bold; color: #0040ff; margin-bottom: 6px; text-align: center; }
-.team-detected { font-size: 12px; color: #555; text-align: center; margin-bottom: 8px; }
+body { background: #fff; padding: 6px; font-size: 12px; }
+.team-detected { font-size: 11px; color: #555; margin-bottom: 5px; }
 .team-detected b { color: #0040ff; }
-textarea { width: 100%; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; padding: 7px 9px; margin-bottom: 7px; background: #fff; color: #000; min-height: 65px; resize: vertical; }
-.submit-btn { display: block; width: 100%; font-size: 13px; font-weight: bold; background: #0040ff; color: #fff; border: none; border-radius: 4px; padding: 10px; cursor: pointer; margin-top: 4px; }
+textarea { width: 100%; font-size: 12px; border: 1px solid #ccc; border-radius: 4px; padding: 5px 7px; margin-bottom: 5px; background: #fff; color: #000; min-height: 50px; resize: vertical; }
+.submit-btn { display: block; width: 100%; font-size: 12px; font-weight: bold; background: #0040ff; color: #fff; border: none; border-radius: 4px; padding: 7px; cursor: pointer; }
 .submit-btn:hover { background: #0030cc; }
-.status { font-size: 12px; color: #555; text-align: center; padding: 4px; min-height: 20px; }
-.feed-label { font-size: 11px; color: #888; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; margin: 12px 0 6px; }
-.post { border: 1px solid #e0e0e0; border-radius: 6px; padding: 9px 11px; margin-bottom: 7px; }
-.post-header { display: flex; justify-content: space-between; margin-bottom: 3px; }
-.post-team { font-weight: bold; color: #0040ff; font-size: 13px; }
-.post-time { font-size: 11px; color: #aaa; }
-.post-text { font-size: 13px; color: #333; line-height: 1.5; }
-.empty { font-size: 13px; color: #aaa; text-align: center; padding: 20px; }
+.status { font-size: 11px; color: #555; text-align: center; padding: 2px; min-height: 16px; }
+.feed-label { font-size: 10px; color: #888; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; margin: 8px 0 4px; }
+.post { border: 1px solid #e0e0e0; border-radius: 4px; padding: 6px 8px; margin-bottom: 5px; }
+.post-header { display: flex; justify-content: space-between; margin-bottom: 2px; }
+.post-team { font-weight: bold; color: #0040ff; font-size: 11px; }
+.post-time { font-size: 10px; color: #aaa; }
+.post-text { font-size: 12px; color: #333; line-height: 1.4; }
+.empty { font-size: 12px; color: #aaa; text-align: center; padding: 12px; }
 </style>
 </head>
 <body>
 
-<h2>💬 League Suggestion Board</h2>
 <p class="team-detected" id="teamLabel">Detecting your team...</p>
-<textarea id="postText" placeholder="Share a suggestion to improve the league..."></textarea>
+<textarea id="postText" placeholder="Share a suggestion..."></textarea>
 <button class="submit-btn" onclick="submitPost()">Submit Suggestion</button>
 <p class="status" id="status"></p>
 
@@ -38,15 +36,9 @@ const MASTER_KEY = '$2a$10$MRejZz/frOMmyK.Z/GCOlOk9Eoq3nMeBJfnCZCneym71sw28DsyzO
 const ACCESS_KEY = '$2a$10$x5zU4CA2F5A5qObO/wOkg.HkKFBITwKSG4nqav2ZbPSr403035jXG';
 const API_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
 
-
 const params = new URLSearchParams(window.location.search);
 let detectedTeam = params.get('team') || 'Unknown Team';
-if (detectedTeam) {
-  document.getElementById('teamLabel').innerHTML = 'Posting as: <b>' + detectedTeam + '</b>';
-} else {
-  document.getElementById('teamLabel').textContent = 'Could not detect team';
-  detectedTeam = 'Unknown Team';
-}
+document.getElementById('teamLabel').innerHTML = 'Posting as: <b>' + detectedTeam + '</b>';
 
 function timeAgo(ts) {
   const d = Math.floor((Date.now() - ts) / 1000);
