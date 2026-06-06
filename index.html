@@ -13,7 +13,6 @@ textarea { width: 100%; font-size: 11px; border: 1px solid #ccc; border-radius: 
 .status { font-size: 10px; color: #555; text-align: center; min-height: 14px; }
 .feed-label { font-size: 9px; color: #888; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; margin: 5px 0 3px; }
 .post { border-bottom: 1px solid #eee; padding: 4px 0; }
-  .post-right { display: flex; align-items: center; gap: 5px; }
 
   .post-header { display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 1px; align-items: center; }
 .post-team { font-weight: bold; color: #0040ff; font-size: 12px; }
@@ -80,13 +79,11 @@ function renderFeed(posts) {
     const i = posts.length - 1 - ri;
     const likes = p.likes || 0;
     return `
-      <div class="post">
+       <div class="post">
         <div class="post-header">
           <span class="post-team">${p.team}</span>
-          <span class="post-right">
-            <button class="like-btn" onclick="likePost(${i})">👍 ${likes}</button>
-            <span class="post-time">${timeAgo(p.ts)}</span>
-          </span>
+          <button class="like-btn" onclick="likePost(${i})">👍 ${likes}</button>
+          <span class="post-time">${timeAgo(p.ts)}</span>
         </div>
         <p class="post-text">${p.text}</p>
       </div>
