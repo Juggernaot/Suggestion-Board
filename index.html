@@ -5,12 +5,8 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
 body { background: #fff; padding: 4px; font-size: 12px; }
-.team-detected b {
-  font-size: 16px;
-  color: #0040ff;
-}
+.team-detected b { font-size: 16px; color: #0040ff; }
 .team-detected { font-size: 10px; color: #555; margin-bottom: 3px; }
-
 textarea { width: 100%; font-size: 11px; border: 1px solid #ccc; border-radius: 3px; padding: 3px 5px; margin-bottom: 3px; background: #fff; color: #000; min-height: 40px; max-height: 45px; resize: none; }
 .submit-btn { display: block; width: 50%; margin: 0 auto; font-size: 11px; font-weight: bold; background: #0040ff; color: #fff; border: none; border-radius: 3px; padding: 5px; cursor: pointer; }
 .submit-btn:hover { background: #0030cc; }
@@ -21,6 +17,8 @@ textarea { width: 100%; font-size: 11px; border: 1px solid #ccc; border-radius: 
 .post-team { font-weight: bold; color: #0040ff; font-size: 12px; }
 .post-time { font-size: 10px; color: #aaa; }
 .post-text { font-size: 13px; font-weight: bold; color: #333; line-height: 1.3; }
+.like-btn { background: none; border: 1px solid #e0e0e0; border-radius: 10px; padding: 1px 6px; font-size: 11px; cursor: pointer; margin-top: 3px; color: #555; }
+.like-btn:hover { background: #f0f0f0; }
 .empty { font-size: 11px; color: #aaa; text-align: center; padding: 8px; }
 </style>
 </head>
@@ -76,15 +74,20 @@ async function savePosts(posts) {
 function renderFeed(posts) {
   const feed = document.getElementById('feed');
   if (!posts.length) { feed.innerHTML = '<p class="empty">No suggestions yet.</p>'; return; }
-  feed.innerHTML = posts.slice().reverse().map(p => `
-    <div class="post">
-      <div class="post-header">
-        <span class="post-team">${p.team}</span>
-        <span class="post-time">${timeAgo(p.ts)}</span>
+  feed.innerHTML = posts.slice().reverse().map((p, ri) => {
+    const i = posts.length - 1 - ri;
+    const likes = p.likes || 0;
+    return `
+      <div class="post">
+        <div class="post-header">
+          <span class="post-team">${p.team}</span>
+          <span class="post-time">${timeAgo(p.ts)}</span>
+        </div>
+        <p class="post-text">${p.text}</p>
+        <button class="like-btn" onclick="likePost(${i})">👍 ${likes}</button>
       </div>
-      <p class="post-text">${p.text}</p>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 async function submitPost() {
@@ -93,11 +96,18 @@ async function submitPost() {
   if (!text) { status.textContent = 'Please enter a suggestion.'; return; }
   status.textContent = 'Posting...';
   const posts = await loadPosts();
-  posts.push({ team: detectedTeam, text, ts: Date.now() });
+  posts.push({ team: detectedTeam, text, ts: Date.now(), likes: 0 });
   await savePosts(posts);
   document.getElementById('postText').value = '';
   status.textContent = 'Posted!';
   setTimeout(() => status.textContent = '', 2000);
+  renderFeed(posts);
+}
+
+async function likePost(index) {
+  const posts = await loadPosts();
+  posts[index].likes = (posts[index].likes || 0) + 1;
+  await savePosts(posts);
   renderFeed(posts);
 }
 
